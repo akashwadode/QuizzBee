@@ -33,17 +33,15 @@ public class DatabaseManager {
 
     public boolean registerUser(String username, String password) {
         if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
-            return false; // Invalid input
+            return false;
         }
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
-            // Check for duplicate username
             PreparedStatement checkStmt = conn.prepareStatement("SELECT COUNT(*) FROM users WHERE username = ?");
             checkStmt.setString(1, username);
             ResultSet rs = checkStmt.executeQuery();
             if (rs.next() && rs.getInt(1) > 0) {
-                return false; // Username already exists
+                return false;
             }
-            // Insert new user
             PreparedStatement insertStmt = conn.prepareStatement(
                     "INSERT INTO users (username, password) VALUES (?, ?)",
                     Statement.RETURN_GENERATED_KEYS
@@ -64,6 +62,38 @@ public class DatabaseManager {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public String getUsername(int userId) {
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement("SELECT username FROM users WHERE user_id = ?")) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("username");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public int getTotalScore(int userId) {
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement("SELECT SUM(score) as total_score FROM attempts WHERE user_id = ?")) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("total_score");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public void setLastLoggedInUserId(int userId) {
+        this.lastLoggedInUserId = userId;
     }
 
     public int getLastLoggedInUserId() {

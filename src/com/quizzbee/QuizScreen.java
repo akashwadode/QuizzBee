@@ -20,7 +20,7 @@ public class QuizScreen {
     private ToggleGroup optionsGroup;
     private Button nextButton;
     private DatabaseManager dbManager = new DatabaseManager();
-    private Stage primaryStage; // Store stage to avoid passing repeatedly
+    private Stage primaryStage;
 
     public QuizScreen(int userId, int categoryId) {
         this.userId = userId;
@@ -29,7 +29,7 @@ public class QuizScreen {
     }
 
     public void show(Stage stage) {
-        this.primaryStage = stage; // Store the stage
+        this.primaryStage = stage;
         questionLabel = new Label();
         optionsGroup = new ToggleGroup();
         optionA = new RadioButton();
@@ -69,7 +69,7 @@ public class QuizScreen {
             optionsGroup.selectToggle(null);
             nextButton.setText("Submit");
         } else {
-            if (userId > 0) { // Validate userId
+            if (userId > 0) {
                 dbManager.saveAttempt(userId, categoryId, score, questions.size());
             } else {
                 new Alert(Alert.AlertType.ERROR, "Invalid user ID. Attempt not saved.").showAndWait();
@@ -107,8 +107,8 @@ public class QuizScreen {
         nextButton.setOnAction(e -> {
             currentQuestionIndex = 0;
             score = 0;
-            CategoryScreen categoryScreen = new CategoryScreen(userId);
-            categoryScreen.show(primaryStage);
+            DashboardScreen dashboardScreen = new DashboardScreen(userId);
+            dashboardScreen.show(primaryStage);
         });
     }
 }

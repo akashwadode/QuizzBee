@@ -20,7 +20,7 @@ public class LoginScreen {
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Password");
         Button loginButton = new Button("Login");
-        Button registerButton = new Button("Register");
+        Button signupButton = new Button("Sign Up");
         Label messageLabel = new Label();
 
         loginButton.setOnAction(e -> {
@@ -29,28 +29,28 @@ public class LoginScreen {
             int userId = dbManager.authenticateUser(username, password);
             if (userId > 0) {
                 messageLabel.setText("Login successful!");
-                CategoryScreen categoryScreen = new CategoryScreen(userId);
-                categoryScreen.show(primaryStage);
+                DashboardScreen dashboardScreen = new DashboardScreen(userId);
+                dashboardScreen.show(primaryStage);
             } else {
                 messageLabel.setText("Invalid username or password.");
                 new Alert(Alert.AlertType.ERROR, "Login failed. Please check your credentials.").showAndWait();
             }
         });
 
-        registerButton.setOnAction(e -> {
+        signupButton.setOnAction(e -> {
             String username = usernameField.getText();
             String password = passwordField.getText();
             if (dbManager.registerUser(username, password)) {
-                messageLabel.setText("Registration successful! Please log in.");
+                messageLabel.setText("Sign up successful! Please log in.");
                 usernameField.clear();
                 passwordField.clear();
             } else {
-                messageLabel.setText("Registration failed. Username may already exist or input is invalid.");
-                new Alert(Alert.AlertType.ERROR, "Registration failed. Try a different username.").showAndWait();
+                messageLabel.setText("Sign up failed. Username may already exist or input is invalid.");
+                new Alert(Alert.AlertType.ERROR, "Sign up failed. Try a different username or check input.").showAndWait();
             }
         });
 
-        loginLayout.getChildren().addAll(usernameField, passwordField, loginButton, registerButton, messageLabel);
+        loginLayout.getChildren().addAll(usernameField, passwordField, loginButton, signupButton, messageLabel);
         Scene loginScene = new Scene(loginLayout, 400, 300);
         primaryStage.setTitle("QuizzBee - Login");
         primaryStage.setScene(loginScene);

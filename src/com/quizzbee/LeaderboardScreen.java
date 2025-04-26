@@ -28,7 +28,7 @@ public class LeaderboardScreen {
 
         Button backButton = new Button("Back");
         backButton.setOnAction(e -> {
-            CategoryScreen categoryScreen = new CategoryScreen(dbManager.getLastLoggedInUserId());
+            DashboardScreen categoryScreen = new DashboardScreen(dbManager.getLastLoggedInUserId());
             categoryScreen.show(primaryStage);
         });
 
