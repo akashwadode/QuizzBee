@@ -1,5 +1,7 @@
-package com.quizzbee;
+package com.quizzbee.pages;
 
+import com.quizzbee.models.LeaderboardEntry;
+import com.quizzbee.database.DatabaseManager;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;

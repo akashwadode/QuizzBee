@@ -1,4 +1,4 @@
-package com.quizzbee;
+package com.quizzbee.models;
 
 public class LeaderboardEntry {
     private final String username;

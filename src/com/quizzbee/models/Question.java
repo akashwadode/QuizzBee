@@ -1,4 +1,4 @@
-package com.quizzbee;
+package com.quizzbee.models;
 
 public class Question {
     private final int id;

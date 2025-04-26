@@ -1,5 +1,6 @@
 package com.quizzbee;
 
+import com.quizzbee.pages.LoginScreen;
 import javafx.application.Application;
 import javafx.stage.Stage;
 

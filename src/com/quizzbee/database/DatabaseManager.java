@@ -1,5 +1,7 @@
-package com.quizzbee;
+package com.quizzbee.database;
 
+import com.quizzbee.models.LeaderboardEntry;
+import com.quizzbee.models.Question;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableView;
 import java.sql.*;

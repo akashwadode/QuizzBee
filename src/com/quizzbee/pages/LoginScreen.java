@@ -1,5 +1,6 @@
-package com.quizzbee;
+package com.quizzbee.pages;
 
+import com.quizzbee.database.DatabaseManager;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
