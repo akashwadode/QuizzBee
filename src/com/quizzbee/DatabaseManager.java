@@ -27,7 +27,43 @@ public class DatabaseManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        lastLoggedInUserId = -1;
         return -1;
+    }
+
+    public boolean registerUser(String username, String password) {
+        if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+            return false; // Invalid input
+        }
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
+            // Check for duplicate username
+            PreparedStatement checkStmt = conn.prepareStatement("SELECT COUNT(*) FROM users WHERE username = ?");
+            checkStmt.setString(1, username);
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                return false; // Username already exists
+            }
+            // Insert new user
+            PreparedStatement insertStmt = conn.prepareStatement(
+                    "INSERT INTO users (username, password) VALUES (?, ?)",
+                    Statement.RETURN_GENERATED_KEYS
+            );
+            insertStmt.setString(1, username);
+            insertStmt.setString(2, password);
+            int rowsAffected = insertStmt.executeUpdate();
+            if (rowsAffected > 0) {
+                ResultSet generatedKeys = insertStmt.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    lastLoggedInUserId = generatedKeys.getInt(1);
+                    return true;
+                }
+            }
+            return false;
+        } catch (SQLException e) {
+            System.err.println("Error registering user: " + username);
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public int getLastLoggedInUserId() {
@@ -84,7 +120,11 @@ public class DatabaseManager {
         return questions;
     }
 
-    public void saveAttempt(int userId, int categoryId, int score, int totalQuestions) {
+    public boolean saveAttempt(int userId, int categoryId, int score, int totalQuestions) {
+        if (userId <= 0) {
+            System.err.println("Invalid userId: " + userId);
+            return false;
+        }
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(
                      "INSERT INTO attempts (user_id, category_id, score, total_questions) VALUES (?, ?, ?, ?)")) {
@@ -93,8 +133,11 @@ public class DatabaseManager {
             stmt.setInt(3, score);
             stmt.setInt(4, totalQuestions);
             stmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
+            System.err.println("Error saving attempt for userId: " + userId + ", categoryId: " + categoryId);
             e.printStackTrace();
+            return false;
         }
     }
 

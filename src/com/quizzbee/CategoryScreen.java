@@ -23,14 +23,22 @@ public class CategoryScreen {
         Label selectLabel = new Label("Select a Category:");
         ComboBox<String> categoryComboBox = new ComboBox<>();
         dbManager.loadCategories(categoryComboBox);
+        // Set the first category as default if available
+        if (!categoryComboBox.getItems().isEmpty()) {
+            categoryComboBox.setValue(categoryComboBox.getItems().get(0));
+        }
 
         Button startQuizButton = new Button("Start Quiz");
         startQuizButton.setOnAction(e -> {
             String selectedCategory = categoryComboBox.getValue();
             if (selectedCategory != null) {
                 int categoryId = dbManager.getCategoryId(selectedCategory);
-                QuizScreen quizScreen = new QuizScreen(userId, categoryId);
-                quizScreen.show(primaryStage);
+                if (categoryId > 0) {
+                    QuizScreen quizScreen = new QuizScreen(userId, categoryId);
+                    quizScreen.show(primaryStage);
+                } else {
+                    new Alert(Alert.AlertType.ERROR, "Invalid category selected.").showAndWait();
+                }
             } else {
                 new Alert(Alert.AlertType.WARNING, "Please select a category!").showAndWait();
             }
