@@ -1,0 +1,53 @@
+#login-layout {
+    -fx-spacing: 16px;
+    -fx-alignment: center;
+    -fx-padding: 30px;
+    -fx-background-color: #f4f6f8;
+}
+
+.input-field {
+    -fx-pref-width: 250px;
+    -fx-font-size: 14px;
+    -fx-padding: 10px;
+    -fx-border-color: #dfe6e9;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-background-color: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 4, 0, 0, 1);
+}
+
+.login-button, .signup-button {
+    -fx-pref-width: 250px;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #ffffff;
+}
+
+.login-button {
+    -fx-background-color: #3498db;
+}
+
+.login-button:hover {
+    -fx-background-color: #2980b9;
+    -fx-cursor: hand;
+}
+
+.signup-button {
+    -fx-background-color: #2ecc71;
+}
+
+.signup-button:hover {
+    -fx-background-color: #27ae60;
+    -fx-cursor: hand;
+}
+
+#message-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #2c3e50;
+    -fx-wrap-text: true;
+    -fx-max-width: 300px;
+    -fx-alignment: center;
+}

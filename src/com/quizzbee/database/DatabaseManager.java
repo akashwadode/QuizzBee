@@ -114,6 +114,20 @@ public class DatabaseManager {
         }
     }
 
+    public List<String> getAllCategories() {
+        List<String> categories = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT category_name FROM categories")) {
+            while (rs.next()) {
+                categories.add(rs.getString("category_name"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return categories;
+    }
+
     public int getCategoryId(String categoryName) {
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement stmt = conn.prepareStatement("SELECT category_id FROM categories WHERE category_name = ?")) {

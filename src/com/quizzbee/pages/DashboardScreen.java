@@ -5,123 +5,179 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.util.List;
+
 public class DashboardScreen {
-    private int userId;
-    private DatabaseManager dbManager = new DatabaseManager();
+    private final int userId;
+    private final DatabaseManager dbManager = new DatabaseManager();
     private VBox contentPane;
+    private VBox selectedBox;
+    private String selectedCategory;
 
     public DashboardScreen(int userId) {
         this.userId = userId;
     }
 
     public void show(Stage primaryStage) {
-        // Main layout
-        VBox mainLayout = new VBox(10);
-        mainLayout.setPadding(new Insets(10));
-        mainLayout.setAlignment(Pos.TOP_CENTER);
+        BorderPane mainLayout = new BorderPane();
+        VBox sidebar = createSidebar(primaryStage);
+        mainLayout.setLeft(sidebar);
 
-        // Navbar
-        HBox navbar = new HBox(10);
-        navbar.setPadding(new Insets(10));
-        navbar.setStyle("-fx-background-color: #333; -fx-alignment: center;");
+        contentPane = new VBox();
+        contentPane.setId("content-pane");
+        mainLayout.setCenter(contentPane);
 
-        Button profileButton = new Button("Profile");
-        Button aboutButton = new Button("About Us");
-        Button categoriesButton = new Button("Categories");
-        Button leaderboardButton = new Button("Leaderboard");
-        Button logoutButton = new Button("Logout");
-
-        // Style buttons
-        for (Button btn : new Button[]{profileButton, aboutButton, categoriesButton, leaderboardButton, logoutButton}) {
-            btn.setStyle("-fx-background-color: #555; -fx-text-fill: white; -fx-font-size: 14px;");
-            btn.setOnMouseEntered(e -> btn.setStyle("-fx-background-color: #777; -fx-text-fill: white; -fx-font-size: 14px;"));
-            btn.setOnMouseExited(e -> btn.setStyle("-fx-background-color: #555; -fx-text-fill: white; -fx-font-size: 14px;"));
-        }
-
-        navbar.getChildren().addAll(profileButton, aboutButton, categoriesButton, leaderboardButton, logoutButton);
-
-        // Content pane for dynamic content
-        contentPane = new VBox(10);
-        contentPane.setAlignment(Pos.CENTER);
-        contentPane.setPadding(new Insets(20));
-
-        // Default content: Categories
         showCategoriesContent();
 
-        // Navbar actions
-        profileButton.setOnAction(e -> showProfileContent());
-        aboutButton.setOnAction(e -> showAboutUsContent());
-        categoriesButton.setOnAction(e -> showCategoriesContent());
-        leaderboardButton.setOnAction(e -> {
-            LeaderboardScreen leaderboardScreen = new LeaderboardScreen();
-            leaderboardScreen.show(primaryStage);
-        });
-        logoutButton.setOnAction(e -> {
-            dbManager.setLastLoggedInUserId(-1); // Clear session
-            LoginScreen loginScreen = new LoginScreen();
-            loginScreen.show(primaryStage);
-        });
+        Scene dashboardScene = new Scene(mainLayout, 800, 500);
 
-        mainLayout.getChildren().addAll(navbar, contentPane);
-        Scene dashboardScene = new Scene(mainLayout, 600, 400);
+        var cssUrl = getClass().getResource("/com/quizzbee/styles/dashboard.css");
+        if (cssUrl != null) {
+            dashboardScene.getStylesheets().add(cssUrl.toExternalForm());
+        } else {
+            System.err.println("dashboard.css not found at /com/quizzbee/styles/dashboard.css");
+        }
+
         primaryStage.setTitle("QuizzBee - Dashboard");
         primaryStage.setScene(dashboardScene);
         primaryStage.show();
+    }
+
+    private VBox createSidebar(Stage primaryStage) {
+        VBox sidebar = new VBox();
+        sidebar.setId("sidebar");
+
+        Button categoriesButton = createSidebarButton("Quiz", this::showCategoriesContent);
+        Button leaderboardButton = createSidebarButton("Leaderboard", () -> {
+            new LeaderboardScreen().show(primaryStage);
+        });
+        Button profileButton = createSidebarButton("Profile", this::showProfileContent);
+        Button aboutButton = createSidebarButton("About Us", this::showAboutUsContent);
+        Button logoutButton = createSidebarButton("Logout", () -> {
+            dbManager.setLastLoggedInUserId(-1);
+            new LoginScreen().show(primaryStage);
+        });
+
+        sidebar.getChildren().addAll(categoriesButton, leaderboardButton, profileButton, aboutButton, logoutButton);
+        return sidebar;
+    }
+
+    private Button createSidebarButton(String text, Runnable action) {
+        Button button = new Button(text);
+        button.getStyleClass().add("sidebar-button");
+        button.setOnAction(e -> action.run());
+        return button;
     }
 
     private void showProfileContent() {
         contentPane.getChildren().clear();
         String username = dbManager.getUsername(userId);
         int totalScore = dbManager.getTotalScore(userId);
-        Label profileLabel = new Label("Profile");
-        profileLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        VBox profileBox = new VBox();
+        profileBox.setId("profile-box");
+
+        var imageUrl = getClass().getResource("/com/quizzbee/images/blank_profile.png");
+        ImageView profileImage = new ImageView(imageUrl != null
+                ? new Image(imageUrl.toExternalForm())
+                : null);
+        profileImage.setFitWidth(100);
+        profileImage.setFitHeight(100);
+        profileImage.setClip(new javafx.scene.shape.Circle(50, 50, 50));
+
         Label usernameLabel = new Label("Username: " + (username != null ? username : "Unknown"));
         Label scoreLabel = new Label("Total Score: " + totalScore);
-        contentPane.getChildren().addAll(profileLabel, usernameLabel, scoreLabel);
+
+        profileBox.getChildren().addAll(
+                createTitleLabel("Profile"),
+                profileImage,
+                usernameLabel,
+                scoreLabel
+        );
+
+        contentPane.getChildren().add(profileBox);
     }
 
     private void showAboutUsContent() {
         contentPane.getChildren().clear();
-        Label aboutLabel = new Label("About Us");
-        aboutLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-        Label aboutText = new Label("QuizzBee is an interactive quiz application designed to test your knowledge " +
-                "across various categories like Maths, Logical Reasoning, English, Computer Science, and AI. " +
-                "Compete with others, track your progress, and have fun learning!");
-        aboutText.setWrapText(true);
-        contentPane.getChildren().addAll(aboutLabel, aboutText);
+
+        VBox aboutBox = new VBox();
+        aboutBox.setId("about-box");
+        aboutBox.getChildren().addAll(
+                createTitleLabel("About Us"),
+                new Label("QuizzBee is an interactive quiz application designed to test your knowledge " +
+                        "across categories like Maths, Logical Reasoning, English, Computer Science, and AI.\n" +
+                        "Compete with others, track your progress, and have fun learning!")
+        );
+
+        contentPane.getChildren().add(aboutBox);
     }
 
     private void showCategoriesContent() {
         contentPane.getChildren().clear();
-        Label selectLabel = new Label("Select a Category:");
-        selectLabel.setStyle("-fx-font-size: 16px;");
-        ComboBox<String> categoryComboBox = new ComboBox<>();
-        dbManager.loadCategories(categoryComboBox);
-        if (!categoryComboBox.getItems().isEmpty()) {
-            categoryComboBox.setValue(categoryComboBox.getItems().get(0));
+        Label titleLabel = createTitleLabel("Select a Category");
+
+        FlowPane categoryFlow = new FlowPane();
+        categoryFlow.setId("category-flow");
+
+        List<String> categories = dbManager.getAllCategories();
+
+        for (String category : categories) {
+            VBox box = new VBox();
+            box.setAlignment(Pos.CENTER);
+            box.getStyleClass().add("category-box");
+
+            Label label = new Label(category);
+            label.getStyleClass().add("category-label");
+            box.getChildren().add(label);
+
+            box.setOnMouseClicked(e -> {
+                if (selectedBox != null) {
+                    selectedBox.getStyleClass().remove("category-box-selected");
+                }
+
+                box.getStyleClass().add("category-box-selected");
+                selectedBox = box;
+                selectedCategory = category;
+                System.out.println("Selected category: " + category);
+            });
+
+            categoryFlow.getChildren().add(box);
         }
 
         Button startQuizButton = new Button("Start Quiz");
-        startQuizButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+        startQuizButton.getStyleClass().add("start-quiz-button");
         startQuizButton.setOnAction(e -> {
-            String selectedCategory = categoryComboBox.getValue();
             if (selectedCategory != null) {
                 int categoryId = dbManager.getCategoryId(selectedCategory);
                 if (categoryId > 0) {
-                    QuizScreen quizScreen = new QuizScreen(userId, categoryId);
-                    quizScreen.show((Stage) contentPane.getScene().getWindow());
+                    new QuizScreen(userId, categoryId).show((Stage) contentPane.getScene().getWindow());
                 } else {
-                    new Alert(Alert.AlertType.ERROR, "Invalid category selected.").showAndWait();
+                    showAlert(Alert.AlertType.ERROR, "Invalid category selected.");
                 }
             } else {
-                new Alert(Alert.AlertType.WARNING, "Please select a category!").showAndWait();
+                showAlert(Alert.AlertType.WARNING, "Please select a category!");
             }
         });
 
-        contentPane.getChildren().addAll(selectLabel, categoryComboBox, startQuizButton);
+        VBox wrapper = new VBox(titleLabel, categoryFlow, startQuizButton);
+        wrapper.setId("category-box");
+
+        contentPane.getChildren().add(wrapper);
+    }
+
+    private Label createTitleLabel(String text) {
+        Label label = new Label(text);
+        label.getStyleClass().add("title-label");
+        return label;
+    }
+
+    private void showAlert(Alert.AlertType type, String message) {
+        new Alert(type, message).showAndWait();
     }
 }

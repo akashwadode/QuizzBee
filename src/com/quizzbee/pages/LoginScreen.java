@@ -9,20 +9,28 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class LoginScreen {
-    private DatabaseManager dbManager = new DatabaseManager();
+    private final DatabaseManager dbManager = new DatabaseManager();
 
     public void show(Stage primaryStage) {
-        VBox loginLayout = new VBox(10);
-        loginLayout.setAlignment(Pos.CENTER);
-        loginLayout.setPadding(new Insets(20));
+        VBox loginLayout = new VBox();
+        loginLayout.setId("login-layout");
 
         TextField usernameField = new TextField();
         usernameField.setPromptText("Username");
+        usernameField.getStyleClass().add("input-field");
+
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Password");
+        passwordField.getStyleClass().add("input-field");
+
         Button loginButton = new Button("Login");
+        loginButton.getStyleClass().add("login-button");
+
         Button signupButton = new Button("Sign Up");
+        signupButton.getStyleClass().add("signup-button");
+
         Label messageLabel = new Label();
+        messageLabel.setId("message-label");
 
         loginButton.setOnAction(e -> {
             String username = usernameField.getText();
@@ -30,8 +38,7 @@ public class LoginScreen {
             int userId = dbManager.authenticateUser(username, password);
             if (userId > 0) {
                 messageLabel.setText("Login successful!");
-                DashboardScreen dashboardScreen = new DashboardScreen(userId);
-                dashboardScreen.show(primaryStage);
+                new DashboardScreen(userId).show(primaryStage);
             } else {
                 messageLabel.setText("Invalid username or password.");
                 new Alert(Alert.AlertType.ERROR, "Login failed. Please check your credentials.").showAndWait();
@@ -52,7 +59,15 @@ public class LoginScreen {
         });
 
         loginLayout.getChildren().addAll(usernameField, passwordField, loginButton, signupButton, messageLabel);
+
         Scene loginScene = new Scene(loginLayout, 400, 300);
+        var cssUrl = getClass().getResource("/com/quizzbee/styles/login.css");
+        if (cssUrl != null) {
+            loginScene.getStylesheets().add(cssUrl.toExternalForm());
+        } else {
+            System.err.println("login.css not found at /com/quizzbee/styles/login.css");
+        }
+
         primaryStage.setTitle("QuizzBee - Login");
         primaryStage.setScene(loginScene);
         primaryStage.show();

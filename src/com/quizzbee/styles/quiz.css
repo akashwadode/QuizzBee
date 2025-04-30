@@ -1,0 +1,41 @@
+/* quiz.css */
+.root {
+    -fx-font-family: "Arial";
+    -fx-background-color: #f5f5f5;
+}
+
+.label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #333333;
+    -fx-wrap-text: true;
+    -fx-max-width: 500px;
+}
+
+.radio-button {
+    -fx-font-size: 14px;
+    -fx-padding: 5px 0;
+    -fx-text-fill: #333333;
+}
+
+.radio-button .radio {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #cccccc;
+    -fx-border-radius: 50%;
+}
+
+.radio-button:selected .radio {
+    -fx-background-color: #0078d7;
+}
+
+.button {
+    -fx-background-color: #0078d7;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-padding: 8px 16px;
+    -fx-background-radius: 5px;
+}
+
+.button:hover {
+    -fx-background-color: #005ba1;
+    -fx-cursor: hand;
+}

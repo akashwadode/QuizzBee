@@ -10,18 +10,20 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class QuizScreen {
-    private int userId;
-    private int categoryId;
-    private List<Question> questions = new ArrayList<>();
+    private final int userId;
+    private final int categoryId;
+    private final List<Question> questions = new ArrayList<>();
     private int currentQuestionIndex = 0;
     private int score = 0;
     private Label questionLabel;
+    private Label questionCounterLabel;
     private RadioButton optionA, optionB, optionC, optionD;
     private ToggleGroup optionsGroup;
     private Button nextButton;
-    private DatabaseManager dbManager = new DatabaseManager();
+    private final DatabaseManager dbManager = new DatabaseManager();
     private Stage primaryStage;
 
     public QuizScreen(int userId, int categoryId) {
@@ -32,6 +34,9 @@ public class QuizScreen {
 
     public void show(Stage stage) {
         this.primaryStage = stage;
+
+        // Initialize UI components
+        questionCounterLabel = new Label();
         questionLabel = new Label();
         optionsGroup = new ToggleGroup();
         optionA = new RadioButton();
@@ -42,75 +47,114 @@ public class QuizScreen {
         optionB.setToggleGroup(optionsGroup);
         optionC.setToggleGroup(optionsGroup);
         optionD.setToggleGroup(optionsGroup);
-
-        nextButton = new Button("Next");
+        nextButton = new Button("Submit");
         nextButton.setOnAction(e -> handleNextButton());
 
-        VBox layout = new VBox(10, questionLabel, optionA, optionB, optionC, optionD, nextButton);
-        layout.setAlignment(Pos.CENTER);
-        layout.setPadding(new Insets(20));
+        // Set up layout
+        VBox quizLayout = new VBox(15, questionCounterLabel, questionLabel, optionA, optionB, optionC, optionD, nextButton);
+        quizLayout.setAlignment(Pos.CENTER_LEFT);
+        quizLayout.setPadding(new Insets(20, 40, 20, 40));
+        quizLayout.setStyle("-fx-background-color: #f5f5f5;");
 
-        Scene scene = new Scene(layout, 600, 400);
+        // Create scene and apply stylesheet
+        Scene scene = new Scene(quizLayout, 600, 400);
+        scene.getStylesheets().add(getClass().getResource("/com/quizzbee/styles/quiz.css").toExternalForm());
         primaryStage.setTitle("QuizzBee - Quiz");
         primaryStage.setScene(scene);
-        displayQuestion();
+
+        // Display first question or error if no questions
+        if (questions.isEmpty()) {
+            showError("No questions available for this category.");
+        } else {
+            displayQuestion();
+        }
     }
 
     private void loadQuestions() {
-        questions = dbManager.loadQuestions(categoryId);
+        questions.addAll(dbManager.loadQuestions(categoryId));
     }
 
     private void displayQuestion() {
         if (currentQuestionIndex < questions.size()) {
-            Question q = questions.get(currentQuestionIndex);
-            questionLabel.setText(q.getQuestionText());
-            optionA.setText(q.getOptionA());
-            optionB.setText(q.getOptionB());
-            optionC.setText(q.getOptionC());
-            optionD.setText(q.getOptionD());
+            Question question = questions.get(currentQuestionIndex);
+            questionCounterLabel.setText(String.format("Question %d of %d", currentQuestionIndex + 1, questions.size()));
+            questionLabel.setText(question.getQuestionText());
+            optionA.setText(question.getOptionA());
+            optionB.setText(question.getOptionB());
+            optionC.setText(question.getOptionC());
+            optionD.setText(question.getOptionD());
             optionsGroup.selectToggle(null);
             nextButton.setText("Submit");
         } else {
-            if (userId > 0) {
-                dbManager.saveAttempt(userId, categoryId, score, questions.size());
-            } else {
-                new Alert(Alert.AlertType.ERROR, "Invalid user ID. Attempt not saved.").showAndWait();
-            }
+            saveAttempt();
             showResults();
         }
     }
 
     private void handleNextButton() {
-        if (currentQuestionIndex < questions.size()) {
-            Question q = questions.get(currentQuestionIndex);
-            RadioButton selected = (RadioButton) optionsGroup.getSelectedToggle();
-            if (selected != null) {
-                String selectedAnswer = selected.getText().equals(q.getOptionA()) ? "A" :
-                        selected.getText().equals(q.getOptionB()) ? "B" :
-                                selected.getText().equals(q.getOptionC()) ? "C" : "D";
-                if (selectedAnswer.equals(q.getCorrectAnswer())) {
-                    score++;
-                }
-                currentQuestionIndex++;
-                displayQuestion();
-            } else {
-                new Alert(Alert.AlertType.WARNING, "Please select an option!").showAndWait();
-            }
+        if (currentQuestionIndex >= questions.size()) {
+            return;
         }
+
+        RadioButton selected = (RadioButton) optionsGroup.getSelectedToggle();
+        if (selected == null) {
+            showWarning("Please select an option!");
+            return;
+        }
+
+        Question question = questions.get(currentQuestionIndex);
+        if (isCorrectAnswer(selected, question)) {
+            score++;
+        }
+
+        currentQuestionIndex++;
+        displayQuestion();
+    }
+
+    private boolean isCorrectAnswer(RadioButton selected, Question question) {
+        String selectedAnswer = selected.getText().equals(question.getOptionA()) ? "A" :
+                selected.getText().equals(question.getOptionB()) ? "B" :
+                        selected.getText().equals(question.getOptionC()) ? "C" : "D";
+        return selectedAnswer.equals(question.getCorrectAnswer());
+    }
+
+    private void saveAttempt() {
+        if (userId <= 0) {
+            showError("Invalid user ID. Attempt not saved.");
+            return;
+        }
+        dbManager.saveAttempt(userId, categoryId, score, questions.size());
     }
 
     private void showResults() {
-        questionLabel.setText("Quiz Completed! Your Score: " + score + "/" + questions.size());
+        questionCounterLabel.setText("");
+        questionLabel.setText(String.format("Quiz Completed! Your Score: %d/%d", score, questions.size()));
         optionA.setVisible(false);
         optionB.setVisible(false);
         optionC.setVisible(false);
         optionD.setVisible(false);
-        nextButton.setText("Home");
-        nextButton.setOnAction(e -> {
+        nextButton.setText("Back to Dashboard");
+        nextButton.setOnAction(e -> confirmAndReturnToDashboard());
+    }
+
+    private void confirmAndReturnToDashboard() {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Return to dashboard?");
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
             currentQuestionIndex = 0;
             score = 0;
             DashboardScreen dashboardScreen = new DashboardScreen(userId);
             dashboardScreen.show(primaryStage);
-        });
+        }
+    }
+
+    private void showWarning(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING, message, ButtonType.OK);
+        alert.showAndWait();
+    }
+
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
+        alert.showAndWait();
     }
 }
