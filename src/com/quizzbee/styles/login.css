@@ -1,53 +1,63 @@
-#login-layout {
+#main-layout {
+    -fx-background-color: #f9f9f9;
+    -fx-pref-width: 800px;
+    -fx-pref-height: 500px;
+}
+
+/* Left Side (Logo Area) */
+#logo-pane {
+    -fx-background-color: #3498db;
+    -fx-alignment: center;
+    -fx-pref-width: 400px;
+    -fx-max-width: infinity;
+    -fx-min-width: 0;
+    -fx-pref-height: 100%;
+}
+
+/* Right Side (Form Area) */
+#form-pane {
+    -fx-padding: 40px;
     -fx-spacing: 16px;
     -fx-alignment: center;
-    -fx-padding: 30px;
-    -fx-background-color: #f4f6f8;
-}
-
-.input-field {
-    -fx-pref-width: 250px;
-    -fx-font-size: 14px;
-    -fx-padding: 10px;
-    -fx-border-color: #dfe6e9;
-    -fx-border-radius: 6px;
-    -fx-background-radius: 6px;
+    -fx-pref-width: 400px;
+    -fx-max-width: infinity;
+    -fx-min-width: 0;
+    -fx-pref-height: 100%;
     -fx-background-color: #ffffff;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 4, 0, 0, 1);
 }
 
-.login-button, .signup-button {
-    -fx-pref-width: 250px;
-    -fx-font-size: 15px;
+/* Form Title */
+.form-title {
+    -fx-font-size: 22px;
     -fx-font-weight: bold;
-    -fx-padding: 10px;
+    -fx-text-fill: #2c3e50;
+}
+
+/* Input Fields */
+.text-field, .password-field {
+    -fx-pref-width: 240px;
+    -fx-font-size: 14px;
+    -fx-padding: 8px;
+}
+
+/* Buttons */
+.button {
+    -fx-pref-width: 240px;
+    -fx-background-color: #27ae60;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
     -fx-background-radius: 8px;
     -fx-border-radius: 8px;
-    -fx-text-fill: #ffffff;
-}
-
-.login-button {
-    -fx-background-color: #3498db;
-}
-
-.login-button:hover {
-    -fx-background-color: #2980b9;
     -fx-cursor: hand;
 }
 
-.signup-button {
-    -fx-background-color: #2ecc71;
+.button:hover {
+    -fx-background-color: #219653;
 }
 
-.signup-button:hover {
-    -fx-background-color: #27ae60;
-    -fx-cursor: hand;
-}
-
-#message-label {
+/* Message Label */
+.label {
+    -fx-text-fill: #e74c3c;
     -fx-font-size: 13px;
-    -fx-text-fill: #2c3e50;
-    -fx-wrap-text: true;
-    -fx-max-width: 300px;
-    -fx-alignment: center;
 }
