@@ -1,5 +1,6 @@
 package com.quizzbee.database;
 
+import com.quizzbee.models.Attempt;
 import com.quizzbee.models.LeaderboardEntry;
 import com.quizzbee.models.Question;
 import javafx.scene.control.ComboBox;
@@ -92,6 +93,27 @@ public class DatabaseManager {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    public double getAccuracyPercentage(int userId) {
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(
+                     "SELECT SUM(score) as total_score, SUM(total_questions) as total_questions " +
+                             "FROM attempts WHERE user_id = ?")) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                int totalScore = rs.getInt("total_score");
+                int totalQuestions = rs.getInt("total_questions");
+                if (totalQuestions > 0) {
+                    return (double) totalScore / totalQuestions * 100.0;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error calculating accuracy for userId: " + userId);
+            e.printStackTrace();
+        }
+        return 0.0;
     }
 
     public void setLastLoggedInUserId(int userId) {
@@ -205,5 +227,28 @@ public class DatabaseManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public List<Attempt> getUserAttempts(int userId) {
+        List<Attempt> attempts = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(
+                     "SELECT c.category_name, a.score, a.total_questions " +
+                             "FROM attempts a JOIN categories c ON a.category_id = c.category_id " +
+                             "WHERE a.user_id = ?")) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                attempts.add(new Attempt(
+                        rs.getString("category_name"),
+                        rs.getInt("score"),
+                        rs.getInt("total_questions")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching attempts for userId: " + userId);
+            e.printStackTrace();
+        }
+        return attempts;
     }
 }

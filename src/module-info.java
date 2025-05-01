@@ -5,4 +5,5 @@ module com.quizzbee {
     exports com.quizzbee.database;
     exports com.quizzbee.pages;
     exports com.quizzbee.models;
+    exports com.quizzbee.pages.components;
 }
