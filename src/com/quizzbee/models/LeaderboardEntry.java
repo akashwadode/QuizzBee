@@ -2,13 +2,13 @@ package com.quizzbee.models;
 
 public class LeaderboardEntry {
     private final String username;
-    private final int score;
+    private final double accuracy;
 
-    public LeaderboardEntry(String username, int score) {
+    public LeaderboardEntry(String username, double accuracy) {
         this.username = username;
-        this.score = score;
+        this.accuracy = accuracy;
     }
 
     public String getUsername() { return username; }
-    public int getScore() { return score; }
+    public double getAccuracy() { return accuracy; }
 }
