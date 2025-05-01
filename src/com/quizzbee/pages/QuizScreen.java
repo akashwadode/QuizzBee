@@ -9,6 +9,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -71,7 +72,10 @@ public class QuizScreen {
     }
 
     private void loadQuestions() {
-        questions.addAll(dbManager.loadQuestions(categoryId));
+        List<Question> allQuestions = dbManager.loadQuestions(categoryId);
+        Collections.shuffle(allQuestions); // Randomize the order of questions
+        int maxQuestions = Math.min(allQuestions.size(), 10); // Limit to 10 questions
+        questions.addAll(allQuestions.subList(0, maxQuestions)); // Add up to 10 questions
     }
 
     private void displayQuestion() {
