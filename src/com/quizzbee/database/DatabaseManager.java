@@ -3,7 +3,6 @@ package com.quizzbee.database;
 import com.quizzbee.models.Attempt;
 import com.quizzbee.models.LeaderboardEntry;
 import com.quizzbee.models.Question;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableView;
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,7 +11,7 @@ import java.util.List;
 public class DatabaseManager {
     private static final String URL = "jdbc:mysql://localhost:3306/quiz_db?useSSL=false";
     private static final String USER = "root";
-    private static final String PASSWORD = "primeaj@25"; // Replace with your MySQL password
+    private static final String PASSWORD = "primeaj@25";
     private int lastLoggedInUserId = -1;
 
     public int authenticateUser(String username, String password) {
@@ -81,19 +80,6 @@ public class DatabaseManager {
         return null;
     }
 
-    public int getTotalScore(int userId) {
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement stmt = conn.prepareStatement("SELECT SUM(score) as total_score FROM attempts WHERE user_id = ?")) {
-            stmt.setInt(1, userId);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("total_score");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
 
     public double getAccuracyPercentage(int userId) {
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -118,22 +104,6 @@ public class DatabaseManager {
 
     public void setLastLoggedInUserId(int userId) {
         this.lastLoggedInUserId = userId;
-    }
-
-    public int getLastLoggedInUserId() {
-        return lastLoggedInUserId;
-    }
-
-    public void loadCategories(ComboBox<String> comboBox) {
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT category_name FROM categories")) {
-            while (rs.next()) {
-                comboBox.getItems().add(rs.getString("category_name"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     public List<String> getAllCategories() {
@@ -247,7 +217,6 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             System.err.println("Error fetching attempts for userId: " + userId);
-            e.printStackTrace();
         }
         return attempts;
     }

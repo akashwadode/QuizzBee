@@ -36,7 +36,6 @@ public class QuizScreen {
     public void show(Stage stage) {
         this.primaryStage = stage;
 
-        // Initialize UI components
         questionCounterLabel = new Label();
         questionLabel = new Label();
         optionsGroup = new ToggleGroup();
@@ -51,13 +50,11 @@ public class QuizScreen {
         nextButton = new Button("Submit");
         nextButton.setOnAction(e -> handleNextButton());
 
-        // Set up layout
         VBox quizLayout = new VBox(15, questionCounterLabel, questionLabel, optionA, optionB, optionC, optionD, nextButton);
         quizLayout.setAlignment(Pos.CENTER_LEFT);
         quizLayout.setPadding(new Insets(20, 40, 20, 40));
         quizLayout.setStyle("-fx-background-color: #f5f5f5;");
 
-        // Create scene and apply stylesheet
         Scene scene = new Scene(quizLayout, 600, 400);
         scene.getStylesheets().add(getClass().getResource("/com/quizzbee/styles/quiz.css").toExternalForm());
         primaryStage.setTitle("QuizzBee - Quiz");

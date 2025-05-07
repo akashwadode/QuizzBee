@@ -44,7 +44,6 @@ public class ProfileComponent {
         Label usernameLabel = new Label("Username: " + (username != null ? username : "Unknown"));
         Label accuracyLabel = new Label(String.format("Accuracy: %.2f%%", accuracyPercentage));
 
-        // Create TableView for attempts
         TableView<Attempt> attemptsTable = new TableView<>();
         attemptsTable.setId("attempts-table");
         attemptsTable.setMaxHeight(200);

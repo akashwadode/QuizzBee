@@ -5,7 +5,6 @@ import com.quizzbee.pages.components.AboutUsComponent;
 import com.quizzbee.pages.components.CategoriesComponent;
 import com.quizzbee.pages.components.LeaderboardComponent;
 import com.quizzbee.pages.components.ProfileComponent;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
@@ -30,7 +29,6 @@ public class DashboardScreen {
         contentPane.setId("content-pane");
         mainLayout.setCenter(contentPane);
 
-        // Load Categories component by default
         new CategoriesComponent(userId, primaryStage, contentPane).show();
 
         Scene dashboardScene = new Scene(mainLayout, 800, 500);
@@ -39,7 +37,7 @@ public class DashboardScreen {
         if (cssUrl != null) {
             dashboardScene.getStylesheets().add(cssUrl.toExternalForm());
         } else {
-            System.err.println("dashboard.css not found at /com/quizzbee/styles/dashboard.css");
+            System.err.println("dashboard.css not found");
         }
 
         primaryStage.setTitle("QuizzBee - Dashboard");

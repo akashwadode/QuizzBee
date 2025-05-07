@@ -1,8 +1,6 @@
 package com.quizzbee.pages;
 
 import com.quizzbee.database.DatabaseManager;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -14,7 +12,6 @@ public class LoginScreen {
     private final DatabaseManager dbManager = new DatabaseManager();
 
     public void show(Stage primaryStage) {
-        // Left Side - Logo
         VBox logoPane = new VBox();
         logoPane.setId("logo-pane");
 
@@ -24,7 +21,6 @@ public class LoginScreen {
         logo.setFitHeight(340);
         logoPane.getChildren().add(logo);
 
-        // Right Side - Login Form
         VBox formPane = new VBox(15);
         formPane.setId("form-pane");
 
@@ -69,7 +65,6 @@ public class LoginScreen {
 
         formPane.getChildren().addAll(titleLabel, usernameField, passwordField, loginButton, signupButton, messageLabel);
 
-        // Layout Setup
         HBox mainLayout = new HBox();
         mainLayout.setId("main-layout");
         HBox.setHgrow(logoPane, Priority.ALWAYS);
