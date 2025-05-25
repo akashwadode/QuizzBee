@@ -7,15 +7,20 @@ import javafx.scene.control.TableView;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.File;
 
 public class DatabaseManager {
-    private static final String URL = "jdbc:mysql://localhost:3306/quiz_db?useSSL=false";
-    private static final String USER = "root";
-    private static final String PASSWORD = "primeaj@25";
+    private static final String DB_NAME = "quiz.db";
+    private static final String URL = "jdbc:sqlite:" + System.getProperty("user.home") + File.separator + DB_NAME;
     private int lastLoggedInUserId = -1;
 
+    public DatabaseManager() {
+        // Initialize the database using DatabaseInitializer
+        new DatabaseInitializer().initializeDatabase();
+    }
+
     public int authenticateUser(String username, String password) {
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement stmt = conn.prepareStatement("SELECT user_id, password FROM users WHERE username = ?")) {
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
@@ -27,6 +32,7 @@ public class DatabaseManager {
                 }
             }
         } catch (SQLException e) {
+            System.err.println("Error authenticating user: " + username);
             e.printStackTrace();
         }
         lastLoggedInUserId = -1;
@@ -37,7 +43,7 @@ public class DatabaseManager {
         if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
             return false;
         }
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
+        try (Connection conn = DriverManager.getConnection(URL)) {
             PreparedStatement checkStmt = conn.prepareStatement("SELECT COUNT(*) FROM users WHERE username = ?");
             checkStmt.setString(1, username);
             ResultSet rs = checkStmt.executeQuery();
@@ -67,7 +73,7 @@ public class DatabaseManager {
     }
 
     public String getUsername(int userId) {
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement stmt = conn.prepareStatement("SELECT username FROM users WHERE user_id = ?")) {
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
@@ -75,14 +81,14 @@ public class DatabaseManager {
                 return rs.getString("username");
             }
         } catch (SQLException e) {
+            System.err.println("Error fetching username for userId: " + userId);
             e.printStackTrace();
         }
         return null;
     }
 
-
     public double getAccuracyPercentage(int userId) {
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement stmt = conn.prepareStatement(
                      "SELECT SUM(score) as total_score, SUM(total_questions) as total_questions " +
                              "FROM attempts WHERE user_id = ?")) {
@@ -108,20 +114,21 @@ public class DatabaseManager {
 
     public List<String> getAllCategories() {
         List<String> categories = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection conn = DriverManager.getConnection(URL);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT category_name FROM categories")) {
             while (rs.next()) {
                 categories.add(rs.getString("category_name"));
             }
         } catch (SQLException e) {
+            System.err.println("Error fetching categories");
             e.printStackTrace();
         }
         return categories;
     }
 
     public int getCategoryId(String categoryName) {
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement stmt = conn.prepareStatement("SELECT category_id FROM categories WHERE category_name = ?")) {
             stmt.setString(1, categoryName);
             ResultSet rs = stmt.executeQuery();
@@ -129,6 +136,7 @@ public class DatabaseManager {
                 return rs.getInt("category_id");
             }
         } catch (SQLException e) {
+            System.err.println("Error fetching category ID for: " + categoryName);
             e.printStackTrace();
         }
         return -1;
@@ -136,7 +144,7 @@ public class DatabaseManager {
 
     public List<Question> loadQuestions(int categoryId) {
         List<Question> questions = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement stmt = conn.prepareStatement("SELECT * FROM questions WHERE category_id = ?")) {
             stmt.setInt(1, categoryId);
             ResultSet rs = stmt.executeQuery();
@@ -153,6 +161,7 @@ public class DatabaseManager {
                 questions.add(q);
             }
         } catch (SQLException e) {
+            System.err.println("Error loading questions for categoryId: " + categoryId);
             e.printStackTrace();
         }
         return questions;
@@ -163,7 +172,7 @@ public class DatabaseManager {
             System.err.println("Invalid userId: " + userId);
             return false;
         }
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement stmt = conn.prepareStatement(
                      "INSERT INTO attempts (user_id, category_id, score, total_questions) VALUES (?, ?, ?, ?)")) {
             stmt.setInt(1, userId);
@@ -180,7 +189,7 @@ public class DatabaseManager {
     }
 
     public void loadLeaderboardData(TableView<LeaderboardEntry> table) {
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection conn = DriverManager.getConnection(URL);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(
                      "SELECT u.username, SUM(a.score) as total_score " +
@@ -195,13 +204,14 @@ public class DatabaseManager {
                 ));
             }
         } catch (SQLException e) {
+            System.err.println("Error loading leaderboard data");
             e.printStackTrace();
         }
     }
 
     public List<Attempt> getUserAttempts(int userId) {
         List<Attempt> attempts = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection conn = DriverManager.getConnection(URL);
              PreparedStatement stmt = conn.prepareStatement(
                      "SELECT c.category_name, a.score, a.total_questions " +
                              "FROM attempts a JOIN categories c ON a.category_id = c.category_id " +
@@ -217,6 +227,7 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             System.err.println("Error fetching attempts for userId: " + userId);
+            e.printStackTrace();
         }
         return attempts;
     }
